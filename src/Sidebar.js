@@ -11,14 +11,15 @@ class Sidebar extends React.Component {
     }
     this.searchAndFilter = new SearchAndFilter();
     this.subject = React.createRef();
+    this.InterestArea = React.createRef();
     this.minimumCredits = React.createRef();
     this.maximumCredits = React.createRef();
     this.search = React.createRef();
   }
 
   setCourses() {
-    if(this.subject.current != null && this.minimumCredits.current != null && this.maximumCredits.current != null) {
-      this.props.setCourses(this.searchAndFilter.searchAndFilter(this.props.courses,this.search.current.value, this.subject.current.value, this.minimumCredits.current.value, this.maximumCredits.current.value));
+    if(this.subject.current != null && this.InterestArea.current != null && this.minimumCredits.current != null && this.maximumCredits.current != null) {
+      this.props.setCourses(this.searchAndFilter.searchAndFilter(this.props.courses,this.search.current.value, this.subject.current.value, this.minimumCredits.current.value, this.maximumCredits.current.value, this.InterestArea.current.value));
     }
   }
 
@@ -45,6 +46,18 @@ class Sidebar extends React.Component {
     return subjectOptions;
   }
 
+  getInterestAreaOptions() {
+    let temp = this.props.interestAreas;
+    let interestAreaOptions = [];
+    interestAreaOptions.push(<option key="All">All</option>)
+
+    for(const interestArea of temp) {
+      interestAreaOptions.push(<option key={interestArea}>{interestArea}</option>);
+    }
+
+    return interestAreaOptions;
+  }
+
   
 
 
@@ -56,7 +69,7 @@ class Sidebar extends React.Component {
           <Card.Body>
             <Card.Title>Search and Filter</Card.Title>
             <Form>
-            <Form.Group controlId="formKeywords" onKeyDown={(e) => this.handleSearchKeyDown(e)} onChange={() => this.setCourses()} style={{width: '100%'}}>
+            <Form.Group controlId="formKeywords"  onChange={() => this.setCourses()} style={{width: '100%'}}>
                 <Form.Label>Search</Form.Label>
                 <div style={{display: 'flex', flexDirection: 'row'}}>
                   <Form.Control type="text" placeholder="keyword search" autoComplete="off" ref={this.search}/>
@@ -67,10 +80,18 @@ class Sidebar extends React.Component {
 
               <Form.Group controlId="formSubject">
                 <Form.Label>Subject</Form.Label>
-                <Form.Control as="select" ref={this.subject} onClick={() => this.setCourses()}>
+                <Form.Control as="select" ref={this.subject} onChange={() => this.setCourses()}>
                   {this.getSubjectOptions()}
                 </Form.Control>
               </Form.Group>
+
+              <Form.Group controlId="formInterestArea">
+                <Form.Label>Interest Areas</Form.Label>
+                <Form.Control as="select" ref={this.InterestArea} onChange={() => this.setCourses()}>
+                  {this.getInterestAreaOptions()}
+                </Form.Control>
+              </Form.Group>
+
 
               <div style={{display: 'flex', flexDirection: 'row'}}>
                 <Form.Group controlId="minimumCredits" onChange={() => this.setCourses()} onKeyDown={(e) => this.handleCreditsKeyDown(e)}>

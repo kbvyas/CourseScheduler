@@ -1,7 +1,27 @@
 class SearchAndFilter {
-  searchAndFilter(courses, search, subject, minimumCredits, maximumCredits) {
+  searchAndFilter(courses, search, subject, minimumCredits, maximumCredits, interestArea) {
 
   
+    
+    
+    if(interestArea !== 'All') {
+      let coursesAfterInterest = [];
+      
+      for(const course of courses) {
+        for(const keyword of course.keywords)
+        {
+          
+          if(keyword.includes(interestArea)){
+          coursesAfterInterest.push(course);
+          
+          break;
+          }
+        } 
+      }
+      courses = coursesAfterInterest;
+    }
+
+
     if(subject !== '' && search !== null) {
       let coursesAfterSearch = [];
 

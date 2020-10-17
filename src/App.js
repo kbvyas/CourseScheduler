@@ -4,6 +4,8 @@ import Sidebar from './Sidebar';
 import CourseArea from './CourseArea';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
+import EnrolledArea from './EnrolledArea';
+import RecommendedArea from './RecommendedArea';
 
 class App extends React.Component {
   constructor(props) {
@@ -12,25 +14,46 @@ class App extends React.Component {
       allCourses: [],
       filteredCourses: [],
       subjects: [],
-      cartCourses: {}
+      recommended: [],
+      interestAreas: [],
+      cartCourses: {},
+      noshow: false,
+    
     };
   }
 
 
 
   componentDidMount() {
-   this.loadInitialState()
+    this.loadInitialState()
+   }
+ 
+   async loadInitialState(){
+     let courseURL = "http://mysqlcs639.cs.wisc.edu:53706/api/react/classes";
+       await this.setState({
+         noshow: true
+       })
+     let courseData = await (await fetch(courseURL)).json()
+       await this.setState({
+         noshow: false
+       })
+ 
+     this.setState({allCourses: courseData, filteredCourses: courseData, subjects: this.getSubjects(courseData), interestAreas: this.getInterestAreas(courseData)});
+   }
+
+
+  getInterestAreas(data){
+    let list = []
+
+    for(const course of data) {
+      for(const l of course.keywords){
+        if(!(list.includes(l))){
+          list.push(l)
+        }
+      }
+    }
+    return list
   }
-
-  async loadInitialState(){
-    let courseURL = "http://mysqlcs639.cs.wisc.edu:53706/api/react/classes";
-    let courseData = await (await fetch(courseURL)).json()
-
-
-    this.setState({allCourses: courseData, filteredCourses: courseData, subjects: this.getSubjects(courseData)});
-  }
-
-
   getSubjects(data) {
     let subjects = [];
     subjects.push("All");
@@ -45,6 +68,7 @@ class App extends React.Component {
 
   setCourses(courses) {
     this.setState({filteredCourses: courses})
+
   }
 
   addCartCourse(data) {
@@ -102,7 +126,7 @@ class App extends React.Component {
 
       }
 
-
+      
     }
     this.setState({cartCourses: newCartCourses});
   }
@@ -128,6 +152,10 @@ class App extends React.Component {
     else {
       delete newCartCourses[data.course];
     }
+
+
+
+    
     this.setState({cartCourses: newCartCourses});
   }
 
@@ -142,8 +170,16 @@ class App extends React.Component {
     return cartData;
   }
 
+   onSelect(courses, course) {
+
+    // Use this for problem 4, recommender algorithm
+    }
+
+  
   render() {
 
+
+    console.log(this.state.enrolledCourses)
     return (
       <>
         <link
@@ -155,7 +191,7 @@ class App extends React.Component {
 
         <Tabs defaultActiveKey="search" style={{position: 'fixed', zIndex: 1, width: '100%', backgroundColor: 'white'}}>
           <Tab eventKey="search" title="Search" style={{paddingTop: '5vh'}}>
-            <Sidebar setCourses={(courses) => this.setCourses(courses)} courses={this.state.allCourses} subjects={this.state.subjects}/>
+            <Sidebar setCourses={(courses) => this.setCourses(courses)} courses={this.state.allCourses} subjects={this.state.subjects} interestAreas = {this.state.interestAreas}/>
             <div style={{marginLeft: '20vw'}}>
               <CourseArea data={this.state.filteredCourses} addCartCourse={(data) => this.addCartCourse(data)} removeCartCourse={(data) => this.removeCartCourse(data)} cartCourses={this.state.cartCourses}/>
             </div>
@@ -163,6 +199,18 @@ class App extends React.Component {
           <Tab eventKey="cart" title="Cart" style={{paddingTop: '5vh'}}>
             <div style={{marginLeft: '20vw'}}>
               <CourseArea data={this.getCartData()} addCartCourse={(data) => this.addCartCourse(data)} removeCartCourse={(data) => this.removeCartCourse(data)} cartCourses={this.state.cartCourses}/>
+            </div>
+          </Tab>
+          <Tab eventKey="enrolledCourses" title="Enrolled" style={{paddingTop: '5vh'}}>
+            {
+            this.state.noshow ?<>Wait</> : (<div style={{marginLeft: '9vw'}}>
+              <EnrolledArea courses={this.state.allCourses} onSelect={(data, course) => {this.onSelect(data, course)}} />
+            </div>)
+            }
+          </Tab>
+          <Tab eventKey="recommendedCourses" title="Recommended" style={{paddingTop: '5vh'}}>
+            <div style={{marginLeft: '9vw'}}>
+              <RecommendedArea courses={this.state.recommended}  />
             </div>
           </Tab>
         </Tabs>
